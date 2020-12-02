@@ -1,370 +1,435 @@
 <template>
-  <div>
-    <!-- 从数据库直接获取字段 -->
-    <el-collapse v-model="activeNames">
-      <el-collapse-item name="1">
-        <template slot="title">
-          <div :style="{fontSize:'16px',paddingLeft:'20px'}">
-            点这里从现有数据库创建代码
-            <i class="header-icon el-icon-thumb"></i>
-          </div>
-        </template>
-        <el-form ref="getTableForm" :inline="true" :model="dbform" label-width="120px">
-          <el-form-item label="数据库名" prop="structName">
-            <el-select @change="getTable" v-model="dbform.dbName" filterable placeholder="请选择数据库">
-              <el-option
-                v-for="item in dbOptions"
-                :key="item.database"
-                :label="item.database"
-                :value="item.database"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="表名" prop="structName">
-            <el-select
-              v-model="dbform.tableName"
-              :disabled="!dbform.dbName"
-              filterable
-              placeholder="请选择表"
-            >
-              <el-option
-                v-for="item in tableOptions"
-                :key="item.tableName"
-                :label="item.tableName"
-                :value="item.tableName"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button @click="getColume" type="primary">使用此表创建</el-button>
-          </el-form-item>
-        </el-form>
-      </el-collapse-item>
-    </el-collapse>
+  <div class="big">
+    <el-row class="el-row">
+      <el-col :span="20">
+        <el-divider direction="vertical" class="top-line"></el-divider
+        ><b style="fontsize: 20px">设备列表</b>
+      </el-col>
+      <el-button type="primary" @click="addDevice">添加设备</el-button>
+      <el-button @click="onSubmit">刷新</el-button>
+    </el-row>
 
-    <el-divider></el-divider>
-    <!-- 初始版本自动化代码工具 -->
-    <el-form ref="autoCodeForm" :rules="rules" :model="form" label-width="120px" :inline="true">
-      <el-form-item label="Struct名称" prop="structName">
-        <el-input v-model="form.structName" placeholder="首字母自动转换大写"></el-input>
+    <el-dialog
+      :visible.sync="addDeviceDialog"
+      custom-class="Device-dialog"
+      title="添加设备"
+    >
+      <el-form :rules="rules" ref="addDeviceForm" :model="deviceInfo">
+        <el-form-item label="摄像头名称" label-width="120px" prop="deviceName">
+          <el-input v-model="deviceInfo.deviceName"></el-input>
+        </el-form-item>
+        <el-form-item label="用户名" label-width="120px" prop="username">
+          <el-input v-model="deviceInfo.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" label-width="120px" prop="password">
+          <el-input show-password v-model="deviceInfo.password"></el-input>
+        </el-form-item>
+        <el-form-item label="协议类型" label-width="120px" prop="protocolType">
+          <el-select v-model="deviceInfo.protocolType" placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="请求地址" label-width="120px" prop="url">
+          <el-input v-model="deviceInfo.url"></el-input>
+        </el-form-item>
+      </el-form>
+      <div class="dialog-footer" slot="footer">
+        <el-button @click="closeAddDeviceDialog">取 消</el-button>
+        <el-button @click="enterAddDeviceDialog" type="primary"
+          >确 定</el-button
+        >
+      </div>
+    </el-dialog>
+    <el-dialog
+      :visible.sync="updateDeviceDialog"
+      custom-class="Device-dialog"
+      title="编辑设备"
+    >
+      <el-form :rules="rules" ref="deviceForm" :model="updateDeviceInfo">
+        <el-form-item label="摄像头名称" label-width="120px" prop="deviceName">
+          <el-input
+            v-model="updateDeviceInfo.deviceName"
+            :disabled="true"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="用户名" label-width="120px" prop="username">
+          <el-input v-model="updateDeviceInfo.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" label-width="120px" prop="password">
+          <el-input
+            show-password
+            v-model="updateDeviceInfo.password"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="协议类型" label-width="120px" prop="protocolType" >
+          <el-select v-model="updateDeviceInfo.protocolType" placeholder="请选择" @change="selectChanged">
+
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="请求地址" label-width="120px" prop="url">
+          <el-input v-model="updateDeviceInfo.url"></el-input>
+        </el-form-item>
+      </el-form>
+      <div class="dialog-footer" slot="footer">
+        <el-button @click="closeUpdateDeviceDialog">取 消</el-button>
+        <el-button @click="enterUpdateDeviceDialog" type="primary"
+          >确 定</el-button
+        >
+      </div>
+    </el-dialog>
+
+    <el-form :model="searchInfo" :inline="true">
+      <el-form-item label="设备搜索：">
+        <el-input
+          placeholder="请输入设备名称"
+          v-model="searchInfo.deviceName"
+        ></el-input>
       </el-form-item>
-      <el-form-item label="tableName" prop="tableName">
-        <el-input v-model="form.tableName" placeholder="指定表名（非必填）"></el-input>
-      </el-form-item>
-      <el-form-item label="Struct简称" prop="abbreviation">
-        <el-input v-model="form.abbreviation" placeholder="简称会作为入参对象名和路由group"></el-input>
-      </el-form-item>
-      <el-form-item label="Struct中文名称" prop="description">
-        <el-input v-model="form.description" placeholder="中文描述作为自动api描述"></el-input>
-      </el-form-item>
-      <el-form-item label="文件名称" prop="packageName">
-        <el-input v-model="form.packageName"></el-input>
-      </el-form-item>
-      <el-form-item label="自动创建api">
-        <el-checkbox v-model="form.autoCreateApiToSql"></el-checkbox>
+      <el-form-item>
+        <el-button @click="onSubmit" type="primary">查询</el-button>
       </el-form-item>
     </el-form>
+
+    <el-row class="el-row">
+      设备状态：
+      <el-button-group>
+        <el-button
+          v-for="item in buttons"
+          :key="item.id"
+          :value="item.value"
+          @click="onClickBtn(item.value)"
+          v-text="item.name"
+        ></el-button>
+      </el-button-group>
+    </el-row>
+
     <!-- 组件列表 -->
-    <div class="button-box clearflex">
-      <el-button @click="editAndAddField()" type="primary">新增Field</el-button>
-    </div>
-    <el-table :data="form.fields" border stripe>
-      <el-table-column type="index" label="序列" width="100"></el-table-column>
-      <el-table-column prop="fieldName" label="Field名"></el-table-column>
-      <el-table-column prop="fieldDesc" label="中文名"></el-table-column>
-      <el-table-column prop="fieldJson" label="FieldJson"></el-table-column>
-      <el-table-column prop="fieldType" label="Field数据类型" width="130"></el-table-column>
-      <el-table-column prop="dataType" label="数据库字段类型" width="130"></el-table-column>
-      <el-table-column prop="dataTypeLong" label="数据库字段长度" width="130"></el-table-column>
-      <el-table-column prop="columnName" label="数据库字段" width="130"></el-table-column>
-      <el-table-column prop="comment" label="数据库字段描述" width="130"></el-table-column>
-      <el-table-column prop="fieldSearchType" label="搜索条件" width="130"></el-table-column>
-      <el-table-column prop="dictType" label="字典" width="130"></el-table-column>
-      <el-table-column label="操作" width="300">
+    <el-table :data="tableData" border stripe>
+      <el-table-column prop="deviceName" label="设备名称" min-width="300">
+      </el-table-column>
+      <el-table-column prop="id" label="设备ID" min-width="300">
+      </el-table-column>
+      <el-table-column prop="status" label="设备状态" min-width="300">
+        <template slot-scope="scope">{{
+          formatStatus(scope.row.status)
+        }}</template>
+      </el-table-column>
+      <el-table-column prop="operation" label="操作" min-width="300">
         <template slot-scope="scope">
+          <el-button type="warning" size="small" @click="getEvents(scope.row)"
+            >查看事件</el-button
+          >
           <el-button
-            size="mini"
             type="primary"
-            icon="el-icon-edit"
-            @click="editAndAddField(scope.row)"
-          >编辑</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            :disabled="scope.$index == 0"
-            @click="moveUpField(scope.$index)"
-          >上移</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            :disabled="(scope.$index + 1) == form.fields.length"
-            @click="moveDownField(scope.$index)"
-          >下移</el-button>
-          <el-popover placement="top" v-model="scope.row.visible">
-            <p>确定删除吗？</p>
+            size="small"
+            @click="updateDevice(scope.row)"
+            >编辑</el-button
+          >
+          <el-popover placement="top" width="160" v-model="scope.row.visible">
+            <p>确定要删除此设备吗</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteField(scope.$index)">确定</el-button>
+              <el-button
+                size="mini"
+                type="text"
+                @click="scope.row.visible = false"
+                >取消</el-button
+              >
+              <el-button
+                type="primary"
+                size="mini"
+                @click="deleteDevice(scope.row)"
+                >确定</el-button
+              >
             </div>
-            <el-button size="mini" type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
+
+            <el-button type="danger" size="small" slot="reference"
+              >删除</el-button
+            >
           </el-popover>
         </template>
       </el-table-column>
     </el-table>
-    <el-tag type="danger">id , created_at , updated_at , deleted_at 会自动生成请勿重复创建</el-tag>
-    <!-- 组件列表 -->
-    <div class="button-box clearflex">
-      <el-button @click="enterForm" type="primary">生成代码包</el-button>
-    </div>
-    <!-- 组件弹窗 -->
-    <el-dialog title="组件内容" :visible.sync="dialogFlag">
-      <FieldDialog v-if="dialogFlag" :dialogMiddle="dialogMiddle" ref="fieldDialog" />
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button type="primary" @click="enterDialog">确 定</el-button>
-      </div>
-    </el-dialog>
+
+    <el-pagination
+      :current-page="page"
+      :page-size="limit"
+      :page-sizes="[10, 30, 50, 100]"
+      :style="{ float: 'right', padding: '20px' }"
+      :total="total"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+      layout="total, sizes, prev, pager, next, jumper"
+    ></el-pagination>
   </div>
 </template>
 <script>
-const fieldTemplate = {
-  fieldName: "",
-  fieldDesc: "",
-  fieldType: "",
-  dataType: "",
-  fieldJson: "",
-  columnName: "",
-  dataTypeLong: "",
-  comment: "",
-  fieldSearchType: "",
-  dictType:""
-};
-
-import FieldDialog from "@/view/systemTools/autoCode/component/fieldDialog.vue";
-import { toUpperCase, toHump } from "@/utils/stringFun.js";
-import { createTemp, getDB, getTable, getColume } from "@/api/autoCode.js";
-import { getDict } from "@/utils/dictionary";
-
+import {
+  addDevice,
+  getDeviceList,
+  updateDevice,
+  deleteDevice,
+} from "@/api/sysDevice";
+import infoList from "@/mixins/infoList";
 export default {
   name: "autoCode",
+  mixins: [infoList],
   data() {
     return {
-      activeNames: [""],
-      dbform: {
-        dbName: "",
-        tableName: ""
+      listApi: getDeviceList,
+      options: [
+        {
+          value: "rtsp",
+          label: "rtsp",
+        },
+        {
+          value: "ip",
+          label: "ip",
+        },
+      ],
+      value: "",
+      buttonsValue: "",
+      addDeviceDialog: false,
+      updateDeviceDialog: false,
+      ipAddress:"",
+      isSelectIpAddress:false,
+      url:"",
+      deviceInfo: {
+        ID: "",
+        deviceName: "",
+        username: "",
+        password: "",
+        protocolType: "",
+        url: "",
       },
-      dbOptions: [],
-      tableOptions: [],
-      addFlag: "",
-      fdMap: {},
-      form: {
-        structName: "",
-        tableName: "",
-        packageName: "",
-        abbreviation: "",
-        description: "",
-        autoCreateApiToSql: false,
-        fields: []
+      updateDeviceInfo: {
+        ID: "",
+        deviceName: "",
+        username: "",
+        password: "",
+        protocolType: "",
+        url: "",
+        ip:"",
       },
+      buttons: [
+        {
+          id: 0,
+          name: "全部",
+          value: -1,
+        },
+        {
+          id: 1,
+          name: "初始化",
+          value: 0,
+        },
+        {
+          id: 2,
+          name: "在线",
+          value: 1,
+        },
+        {
+          id: 3,
+          name: "离线",
+          value: 3,
+        },
+        {
+          id: 4,
+          name: "异常",
+          value: 8,
+        },
+      ],
+
       rules: {
-        structName: [
-          { required: true, message: "请输入结构体名称", trigger: "blur" }
+        deviceName: [
+          { required: true, message: "请输入设备名称", trigger: "blur" },
         ],
-        abbreviation: [
-          { required: true, message: "请输入结构体简称", trigger: "blur" }
-        ],
-        description: [
-          { required: true, message: "请输入结构体描述", trigger: "blur" }
-        ],
-        packageName: [
-          {
-            required: true,
-            message: "文件名称：sys_xxxx_xxxx",
-            trigger: "blur"
-          }
-        ]
+        protocolType: [{ required: true, trigger: "blur" }],
+        url: [{ required: true, message: "请输入请求地地址", trigger: "blur" }],
       },
-      dialogMiddle: {},
-      bk: {},
-      dialogFlag: false
     };
   },
-  components: {
-    FieldDialog
-  },
+  components: {},
   methods: {
-    editAndAddField(item) {
-      this.dialogFlag = true;
-      if (item) {
-        this.addFlag = "edit";
-        this.bk = JSON.parse(JSON.stringify(item));
-        this.dialogMiddle = item;
+    onClickBtn(v) {
+      if (v != -1) {
+        this.searchInfo.status = v;
       } else {
-        this.addFlag = "add";
-        this.dialogMiddle = JSON.parse(JSON.stringify(fieldTemplate));
+        delete this.searchInfo.status;
+      }
+      this.onSubmit();
+    },
+    addDevice() {
+      this.addDeviceDialog = true;
+    },
+    closeAddDeviceDialog() {
+      this.$refs.addDeviceForm.resetFields();
+      this.addDeviceDialog = false;
+    },
+    selectChanged(value) {
+	    console.log("--------------------选中---",value)
+      if(value=='ip'){
+          this.isSelectIpAddress=true;
+          this.updateDeviceInfo.url=this.ipAddress;
+      }else if(value=='rtsp'){
+        this.isSelectIpAddress=false;
+        this.updateDeviceInfo.url=this.url;
       }
     },
-    moveUpField(index) {
-      if (index == 0) {
-        return;
-      }
-      const oldUpField = this.form.fields[index - 1];
-      this.form.fields.splice(index - 1, 1);
-      this.form.fields.splice(index, 0, oldUpField);
+    closeUpdateDeviceDialog() {
+      this.updateDeviceDialog = false;
     },
-    moveDownField(index) {
-      const fCount = this.form.fields.length;
-      if (index == fCount - 1) {
-        return;
-      }
-      const oldDownField = this.form.fields[index + 1];
-      this.form.fields.splice(index + 1, 1);
-      this.form.fields.splice(index, 0, oldDownField);
-    },
-    enterDialog() {
-      this.$refs.fieldDialog.$refs.fieldDialogFrom.validate(valid => {
-        if (valid) {
-          this.dialogMiddle.fieldName = toUpperCase(
-            this.dialogMiddle.fieldName
-          );
-          if (this.addFlag == "add") {
-            this.form.fields.push(this.dialogMiddle);
-          }
-          this.dialogFlag = false;
-        } else {
-          return false;
-        }
+    //页面跳转到事件列表页面
+   async getEvents(row) {
+      //带参数跳转
+      this.$router.push({
+        name: "deviceEvents",
+        params: {
+          id: row.id,
+        },
       });
     },
-    closeDialog() {
-      if (this.addFlag == "edit") {
-        this.dialogMiddle = this.bk;
-      }
-      this.dialogFlag = false;
-    },
-    deleteField(index) {
-      this.form.fields.splice(index, 1);
-    },
-    async enterForm() {
-      if (this.form.fields.length <= 0) {
-        this.$message({
-          type: "error",
-          message: "请填写至少一个field"
-        });
-        return false;
-      }
-      if (
-        this.form.fields.some(item => item.fieldName == this.form.structName)
-      ) {
-        this.$message({
-          type: "error",
-          message: "存在与结构体同名的字段"
-        });
-        return false;
-      }
-      this.$refs.autoCodeForm.validate(async valid => {
+
+    //添加摄像头
+    async enterAddDeviceDialog() {
+      this.$refs.addDeviceForm.validate(async (valid) => {
         if (valid) {
-          this.form.structName = toUpperCase(this.form.structName);
-          if (this.form.structName == this.form.abbreviation) {
-            this.$message({
-              type: "error",
-              message: "structName和struct简称不能相同"
-            });
-            return false;
-          }
-          const data = await createTemp(this.form);
-          if(data.headers?.success == "false"){
-            return
-          }
-          const blob = new Blob([data]);
-          const fileName = "ginvueadmin.zip";
-          if ("download" in document.createElement("a")) {
-            // 不是IE浏览器
-            let url = window.URL.createObjectURL(blob);
-            let link = document.createElement("a");
-            link.style.display = "none";
-            link.href = url;
-            link.setAttribute("download", fileName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link); // 下载完成移除元素
-            window.URL.revokeObjectURL(url); // 释放掉blob对象
+          const res = await addDevice(this.deviceInfo);
+          if (res.data.code == 200) {
+            this.$message({ type: "success", message: "创建成功" });
           } else {
-            // IE 10+
-            window.navigator.msSaveBlob(blob, fileName);
+            this.$message({ type: "error", message: res.data.message });
           }
-        } else {
-          return false;
+          await this.getTableData();
+          this.closeAddDeviceDialog();
         }
       });
     },
-    async getDb() {
-      const res = await getDB();
-      if (res.code == 0) {
-        this.dbOptions = res.data.dbs;
+    //编辑摄像头
+    async updateDevice(row) {
+      this.updateDeviceDialog = true;
+      this.updateDeviceInfo.deviceName = row.deviceName;
+      this.updateDeviceInfo.username = row.userName;
+      this.updateDeviceInfo.password = row.password;
+      this.updateDeviceInfo.protocolType = row.protocolType;
+      if(this.updateDeviceInfo.protocolType=='ip'){
+         this.updateDeviceInfo.url = row.ip;
+        this.isSelectIpAddress=true;
+      }else{
+         this.updateDeviceInfo.url = row.url;
+        this.isSelectIpAddress=false;
       }
+      this.updateDeviceInfo.ID = row.id;
+      this.ipAddress=row.ip;
+      this.url=row.url;
     },
-    async getTable() {
-      const res = await getTable({ dbName: this.dbform.dbName });
-      if (res.code == 0) {
-        this.tableOptions = res.data.tables;
-      }
-      this.dbform.tableName = "";
-    },
-    async getColume() {
-      const gormModelList = ["id", "created_at", "updated_at", "deleted_at"];
-      const res = await getColume(this.dbform);
-      if (res.code == 0) {
-        const tbHump = toHump(this.dbform.tableName);
-        this.form.structName = toUpperCase(tbHump);
-        this.form.tableName = this.dbform.tableName;
-        this.form.packageName = tbHump;
-        this.form.abbreviation = tbHump;
-        this.form.description = tbHump + "表";
-        this.form.autoCreateApiToSql = true;
-        this.form.fields = [];
-        res.data.columes &&
-          res.data.columes.map(item => {
-            if (!gormModelList.some(gormfd => gormfd == item.columeName)) {
-              const fbHump = toHump(item.columeName);
-              this.form.fields.push({
-                fieldName: toUpperCase(fbHump),
-                fieldDesc: item.columeComment || fbHump + "字段",
-                fieldType: this.fdMap[item.dataType],
-                dataType: item.dataType,
-                fieldJson: fbHump,
-                dataTypeLong: item.dataTypeLong,
-                columnName: item.columeName,
-                comment: item.columeComment,
-                fieldSearchType: "",
-                dictType:""
-              });
-            }
-          });
-      }
-    },
-    async setFdMap() {
-      const fdTpyes = ["string", "int", "bool", "float64", "time.Time"];
-      fdTpyes.map(async fdtype => {
-        const res = await getDict(fdtype);
-        res.map(item => {
-          this.fdMap[item.label] = fdtype;
-        });
+
+    async enterUpdateDeviceDialog() {
+      this.$refs.deviceForm.validate(async (valid) => {
+        if (valid) {
+
+          if(this.isSelectIpAddress){
+            delete this.updateDeviceInfo.url;
+            this.updateDeviceInfo.ip=this.ipAddress;
+            this.isSelectIpAddress=false;
+          }
+          const res = await updateDevice(this.updateDeviceInfo);
+          if (res.code == 200) {
+            this.$message({ type: "success", message: "修改成功！" });
+          } else {
+            this.$message({ type: "error", message: res.data.message });
+          }
+          await this.getTableData();
+          this.closeUpdateDeviceDialog();
+        }
       });
-    }
+    },
+
+    async deleteDevice(row) {
+      const res = await deleteDevice(row.id);
+      if (res.code == 0) {
+        this.getTableData();
+        row.visible = false;
+      }
+      await this.getTableData();
+    },
+    formatStatus: function (status) {
+      switch (status) {
+        case 0:
+          return "初始化";
+        case 1:
+          return "在线";
+        case 3:
+          return "离线";
+        case 8:
+          return "异常";
+      }
+    },
+
+    //条件搜索
+    onSubmit() {
+      this.page = 1;
+      this.limit = 20;
+      this.getTableData();
+    },
   },
   created() {
-    this.getDb();
-    this.setFdMap();
-  }
+    this.getTableData();
+  },
 };
 </script>
-<style scope lang="scss">
-.button-box {
-  padding: 10px 20px;
-  .el-button {
-    float: right;
+<style lang="scss" scoped>
+.Device-dialog {
+  .header-img-box {
+    width: 80px;
+    height: 200px;
+    border: 1px dashed #ccc;
+    border-radius: 20px;
+    text-align: center;
+    line-height: 200px;
+    cursor: pointer;
   }
+}
+.el-row {
+  margin-bottom: 20px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+.el-col {
+  border-radius: 4px;
+}
+.bg-purple-dark {
+  background: #99a9bf;
+}
+.bg-purple {
+  background: #d3dce6;
+}
+.bg-purple-light {
+  background: #e5e9f2;
+}
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+}
+.row-bg {
+  padding: 10px 0;
+  background-color: #f9fafc;
+}
+.top-line {
+  width: 3px;
+  height: 16px;
+  background: #007aff;
 }
 </style>

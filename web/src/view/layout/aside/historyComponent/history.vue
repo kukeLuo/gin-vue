@@ -1,7 +1,7 @@
 <template>
   <div class="router-history">
     <el-tabs
-      :closable="!(historys.length==1&&this.$route.name=='dashboard')"
+      :closable="!(historys.length==1&&this.$route.name=='cockpit')"
       @contextmenu.prevent.native="openContextMenu($event)"
       @tab-click="changeTab"
       @tab-remove="removeTab"
@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       historys: [],
-      activeValue: 'dashboard',
+      activeValue: 'cockpit',
       contextMenuVisible: false,
       left: 0,
       top: 0,
@@ -50,9 +50,9 @@ export default {
     })
     const initHistorys = [
       {
-        name: 'dashboard',
+        name: 'cockpit',
         meta: {
-          title: '仪表盘'
+          title: '驾驶舱'
         }
       }
     ]
@@ -67,7 +67,7 @@ export default {
   },
   methods: {
     openContextMenu(e) {
-      if (this.historys.length == 1 && this.$route.name == 'dashboard') {
+      if (this.historys.length == 1 && this.$route.name == 'cockpit') {
         return false
       }
       if (e.srcElement.id) {
@@ -89,13 +89,13 @@ export default {
     closeAll() {
       this.historys = [
         {
-          name: 'dashboard',
+          name: 'cockpit',
           meta: {
-            title: '仪表盘'
+            title: '驾驶舱'
           }
         }
       ]
-      this.$router.push({ name: 'dashboard' })
+      this.$router.push({ name: 'cockpit' })
       this.contextMenuVisible = false
       sessionStorage.setItem('historys', JSON.stringify(this.historys))
     },
@@ -169,7 +169,7 @@ export default {
       const index = this.historys.findIndex(item => item.name == tab)
       if (this.$route.name == tab) {
         if (this.historys.length == 1) {
-          this.$router.push({ name: 'dashboard' })
+          this.$router.push({ name: 'cockpit' })
         } else {
           if (index < this.historys.length - 1) {
             this.$router.push({ name: this.historys[index + 1].name,query:this.historys[index + 1].query,params:this.historys[index + 1].params })

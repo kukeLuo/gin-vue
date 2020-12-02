@@ -4,8 +4,7 @@
       <el-row :class="[isShadowBg?'shadowBg':'']" @click.native="changeShadow()"></el-row>
       <el-aside class="main-cont main-left">
         <div class="tilte">
-          <img alt class="logoimg" src="~@/assets/nav_logo.png" />
-          <h2 class="tit-text" v-if="isSider">5G 边缘网关</h2>
+          <img alt class="logoimage" src="~@/assets/bie-gateway.png" />
         </div>
         <Aside class="aside" />
       </el-aside>
@@ -368,6 +367,13 @@ $mainHight: 100vh;
     vertical-align: middle;
     background: #fff;
     border-radius: 50%;
+    padding: 3px;
+  }
+  .logoimage {
+    width: 127px;
+    height: 34px;
+    vertical-align: middle;
+    background: #002140;
     padding: 3px;
   }
   .tit-text {

@@ -6,7 +6,8 @@ export default {
             total: 10,
             limit: 10,
             tableData: [],
-            searchInfo: {}
+            searchInfo: {},
+            status:""
         }
     },
     methods: {
@@ -27,15 +28,20 @@ export default {
             this.getTableData()
         },
         async getTableData(page = this.page, limit = this.limit) {
-            console.log("----",this.searchInfo);
+            
              const table = await this.listApi({ page, limit, ...this.searchInfo })
-             console.log("获取表单--------",this.searchInfo);
-          
+             console.log("获取表单数据----",JSON.stringify(table));
+   
             if(table.code == 200){
-                this.tableData = table.data.data
-                this.total = table.data.total_count
-                this.page = table.data.page
-                this.limit = table.data.limit
+                if(table.data.total_count!=undefined){
+                    this.tableData = table.data.data
+                    this.total = table.data.total_count
+                    this.page = table.data.page
+                    this.limit = table.data.limit
+                }else{
+                    this.tableData = table.data
+
+                }
             }
         }
     }

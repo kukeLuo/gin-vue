@@ -10,9 +10,9 @@ import service from '@/utils/request'
 // @Router /sysDictionary/createSysDictionary [post]
 export const createSysDictionary = (data) => {
      return service({
-         url: "/sysDictionary/createSysDictionary",
+         url: "/api/v1/systemcenter/dictionaries",
          method: 'post',
-         data
+         data: data
      })
  }
 
@@ -27,7 +27,7 @@ export const createSysDictionary = (data) => {
 // @Router /sysDictionary/deleteSysDictionary [delete]
  export const deleteSysDictionary = (data) => {
      return service({
-         url: "/sysDictionary/deleteSysDictionary",
+         url: "/api/v1/systemcenter/dictionaries/"+data,
          method: 'delete',
          data
      })
@@ -43,9 +43,9 @@ export const createSysDictionary = (data) => {
 // @Router /sysDictionary/updateSysDictionary [put]
  export const updateSysDictionary = (data) => {
      return service({
-         url: "/sysDictionary/updateSysDictionary",
+         url: "/api/v1/systemcenter/dictionaries/"+data.id,
          method: 'put',
-         data
+         data:data
      })
  }
 
@@ -77,7 +77,7 @@ export const createSysDictionary = (data) => {
 // @Router /sysDictionary/getSysDictionaryList [get]
  export const getSysDictionaryList = (params) => {
      return service({
-         url: "/sysDictionary/getSysDictionaryList",
+         url: "/api/v1/systemcenter/dictionaries",
          method: 'get',
          params
      })

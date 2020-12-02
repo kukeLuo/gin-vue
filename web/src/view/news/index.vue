@@ -1,10 +1,10 @@
 <template>
-  <router-view></router-view>
+    <router-view></router-view>
 </template>
 
 <script>
 export default {
-    name:"System",
+    name:"News",
 }
 </script>
 <style lang="scss">

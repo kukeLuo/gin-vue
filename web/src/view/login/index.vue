@@ -1,7 +1,14 @@
 <template>
   <div id="userLayout" class="user-layout-wrapper">
     <div class="container">
-     
+      <div class="top">
+        <div class="desc">
+          <img class="logo_login" src="@/assets/bie-gateway.png" alt="" />
+        </div>
+        <div class="header">           
+            <span class="title">5G 边缘网关</span>
+        </div>
+      </div>
       <div class="main">
         <el-form
           :model="loginForm"
@@ -116,17 +123,63 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.login-register-box {
+  height: 100vh;
+  .login-box {
+    width: 40vw;
+    position: absolute;
+    left: 50%;
+    margin-left: -22vw;
+    top: 5vh;
+    .logo {
+      height: 35vh;
+      width: 35vh;
+    }
+  }
+}
 
+.link-icon {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+}
 
+.vPic {
+  width: 33%;
+  height: 38px;
+  float: right !important;
+  background: #ccc;
+  img {
+    cursor: pointer;
+    vertical-align: middle;
+  }
+}
+
+.logo_login {
+  width: 100px;
+}
+
+#userLayout.user-layout-wrapper {
+  height: 100%;
+  position: relative;
+  &.mobile {
+    .container {
+      .main {
+        max-width: 368px;
+        width: 98%;
+      }
+    }
+  }
 
   .container {
     position: relative;
     overflow: auto;
     width: 100%;
-    height: 100%;
-    background:  url(~@/assets/login-back.png) no-repeat;
+    min-height: 100%;
+    background: #f0f2f5 url(~@/assets/background.svg) no-repeat 50%;
     background-size: 100%;
-    padding: 110px 0 444px;
+    padding: 110px 0 144px;
     a {
       text-decoration: none;
     }
@@ -172,13 +225,13 @@ export default {
     }
 
     .main {
-      
       min-width: 260px;
       width: 368px;
-      margin:300px 0px 15px 1200px;
+      margin: 0 auto;
     }
 
     .footer {
+      position: relative;
       width: 100%;
       padding: 0 20px;
       margin: 40px 0 10px;
@@ -197,12 +250,11 @@ export default {
         }
       }
       .copyright {
-        color: #fff;
+        color: rgba(0, 0, 0, 0.45);
         font-size: 14px;
         padding-right: 40px;
-        margin:300px 0px 15px 0px;
       }
-    
+    }
   }
 }
 </style>

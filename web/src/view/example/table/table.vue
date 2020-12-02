@@ -1,39 +1,44 @@
 // table 纯前端示例
 <template>
   <div>
-    <el-table
-      :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
-      stripe
-      style="width: 100%"
-      tooltip-effect="dark"
-    >
-      <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column label="日期" width="120">
-        <template slot-scope="scope">{{ scope.row.date }}</template>
-      </el-table-column>
-      <el-table-column label="姓名" prop="name" width="120"></el-table-column>
-      <el-table-column label="年龄" prop="age" width="120"></el-table-column>
-      <el-table-column label="住址" prop="address" min-width="200" show-overflow-tooltip></el-table-column>
-      <el-table-column label="是否禁用" prop="switch" width="180">
-        <template slot-scope="scope">
-          <el-switch active-text="开启" inactive-text="禁用" v-model="scope.row.switch"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column label="按钮组" width="200">
-        <template slot-scope="scope" >
-            <el-button type="text" size="small" @click="toggleSelection([scope.row])">按钮1</el-button>
-            <el-button type="text" size="small" @click="toggleSelection([scope.row])">按钮2</el-button>
-            <el-button type="text" size="small" @click="toggleSelection([scope.row])">按钮3</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <div style="margin-top: 20px">
-      <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>
-      <el-button @click="toggleSelection()">取消选择</el-button>
+    <div class="top">
+        <el-divider direction="vertical" class=top-line></el-divider>
+        
+        <span class="top-text"><b>系统通知</b></span>
     </div>
+
+        <el-table :data="tableData" >
+          <el-table-column
+            label="序号"
+            type="index"
+            min-width="50">
+          </el-table-column>
+          <el-table-column property="messageContent" label="消息内容" min-width="300">
+
+            <el-row>
+                <el-col  :span="10"><label for="">技能ID:</label></el-col>
+            </el-row>
+            <el-row>
+                <el-col  :span="40"><label for="">89289jkjskhjd很大哈扩所扩多卡或军军军军或d89289jkjskhjd很大哈扩所扩多卡或军军军军或dk</label></el-col>
+            </el-row>
+          </el-table-column>
+          <el-table-column
+            property="leavel"
+            label="问题等级"
+            min-width="120">
+          </el-table-column>
+          <el-table-column
+            property="time"
+            min-width="100"
+            label="时间">
+          </el-table-column>
+
+          <el-table-column
+           min-width="50"
+            property="messageStatus"
+            label="消息状态">
+          </el-table-column>
+        </el-table>
   </div>
 </template>
 
@@ -44,53 +49,53 @@ export default {
     return {
       tableData: [
         {
-          date: '2016-05-03',
-          name: '王小虎',
-          age: 12,
+          time: '2016-05-03',
+          messageContent: '王小虎',
+          messageStatus: '已读',
           address: '上海市普陀区金沙江路 1518 弄',
-          switch:true
+          leavel:'故障'
         },
         {
-          date: '2016-05-02',
-          name: '王小虎',
-          age: 12,
+          time: '2016-05-03',
+          messageContent: '王小虎',
+          messageStatus: '已读',
           address: '上海市普陀区金沙江路 1518 弄',
-          switch:true
+          leavel:'故障'
         },
         {
-          date: '2016-05-04',
-          name: '王小虎',
-          age: 12,
+          time: '2016-05-03',
+          messageContent: '王小虎',
+          messageStatus: '已读',
           address: '上海市普陀区金沙江路 1518 弄',
-          switch:true
+          leavel:'故障'
         },
         {
-          date: '2016-05-01',
-          name: '王小虎',
-          age: 12,
+          time: '2016-05-03',
+          messageContent: '王小虎',
+          messageStatus: '已读',
           address: '上海市普陀区金沙江路 1518 弄',
-          switch:false
+          leavel:'故障'
         },
         {
-          date: '2016-05-08',
-          name: '王小虎',
-          age: 12,
+          time: '2016-05-03',
+          messageContent: '王小虎',
+          messageStatus: '已读',
           address: '上海市普陀区金沙江路 1518 弄',
-          switch:true
+          leavel:'故障'
         },
         {
-          date: '2016-05-06',
-          name: '王小虎',
-          age: 12,
+          time: '2016-05-03',
+          messageContent: '王小虎',
+          messageStatus: '已读',
           address: '上海市普陀区金沙江路 1518 弄',
-          switch:true
+          leavel:'故障'
         },
         {
-          date: '2016-05-07',
-          name: '王小虎',
-          age: 12,
+          time: '2016-05-03',
+          messageContent: '王小虎',
+          messageStatus: '已读',
           address: '上海市普陀区金沙江路 1518 弄',
-          switch:false
+          leavel:'故障'
         }
       ],
       multipleSelection: []
@@ -98,18 +103,19 @@ export default {
   },
 
   methods: {
-    toggleSelection(rows) {
-      if (rows) {
-        rows.forEach(row => {
-          this.$refs.multipleTable.toggleRowSelection(row)
-        })
-      } else {
-        this.$refs.multipleTable.clearSelection()
-      }
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val
-    }
+    
+   
+  },
+  async created() {
+    this.limit = 10;
+    await this.getTableData();
   }
 }
 </script>
+<style lang="scss">
+     .top-line{
+            width: 3px;
+            height: 16px;
+            background: #007aff;
+    }
+</style>

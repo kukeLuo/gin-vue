@@ -97,9 +97,30 @@ export const setUserAuthority = (data) => {
 export const deleteUser = (data) => {
     console.log("删除用户:"+JSON.stringify(data));
     return service({
-        url: "/api/v1/systemcenter/users/"+data.id,
+        url: "/api/v1/systemcenter/users/"+data.ID,
         method: 'delete',
         data: data
+    })
+}
+
+
+
+// @Tags updateUser
+// @Summary 修改用户状态
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body request.SetUserAuth true "更改用户"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"修改成功"}"
+// @Router /user/updateUser [delete]
+export const updateUserStatus = (data) => {
+
+    console.log("更改用户:"+JSON.stringify(data));
+
+    return service({
+        url: "/api/v1/systemcenter/users/"+data.ID,
+        method: 'put',
+        data: data.row
     })
 }
 
@@ -114,6 +135,38 @@ export const deleteUser = (data) => {
 export const setUserInfo = (data) => {
     return service({
         url: "/user/setUserInfo",
+        method: 'put',
+        data: data
+    })
+}
+
+// @Tags SysUser
+// @Summary 根据id 获取用户详细信息
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.SysUser true "获取用户详细信息"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"修改成功"}"
+// @Router /user/setUserInfo [put]
+export const getUserInfoById = (data) => {
+    return service({
+        url: "/api/v1/systemcenter/users/"+data.ID,
+        method: 'get',
+        data: data
+    })
+}
+
+// @Tags SysUser
+// @Summary 修改用户详细信息
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.SysUser true "修改用户详细信息"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"修改成功"}"
+// @Router /api/v1/systemcenter/users
+export const updateUserInfo = (data) => {
+    return service({
+        url: "/api/v1/systemcenter/users/"+data.ID,
         method: 'put',
         data: data
     })

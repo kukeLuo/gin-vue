@@ -7,90 +7,96 @@
         </el-form-item>
      
         <el-form-item label="角色">
-          <el-select clearable placeholder="全部" v-model="searchInfo.method">
+          <el-select  placeholder="全部" v-model="searchInfo.authorityId">
             <el-option
-              :key="item.value"
-              :label="`${item.label}(${item.value})`"
-              :value="item.value"
-              v-for="item in methodOptions"
-            ></el-option>
+                    key=""
+                    label="全部"
+                    value="">
+                </el-option>
+                <el-option
+                    key="1"
+                    label="应用管理员"
+                    value="1">
+                </el-option>
+                <el-option
+                    key="2"
+                    label="运维管理员"
+                    value="2">
+                </el-option>
           </el-select>
         </el-form-item>
 
-        </el-form-item>    
-            <el-form-item label="状态" prop="status">
-            <el-select v-model="searchInfo.status" clear placeholder="全部">
-                <el-option
-                    key="true"
+
+        <el-form-item label="是否启用">
+          <el-select  placeholder="全部" v-model="searchInfo.status">
+               <el-option
+                    key=""
+
                     label="全部"
                     value="">
                 </el-option>
                 <el-option
                     key="true"
-                    label="正常"
+                    label="是"
                     value="true">
                 </el-option>
                 <el-option
                     key="false"
-                    label="不正常"
+                    label="否"
                     value="false">
                 </el-option>
-            </el-select>
-            </el-form-item>
 
-        <el-form-item label="是否启用">
-          <el-select clearable placeholder="全部" v-model="searchInfo.method">
-            <el-option
-              :key="item.value"
-              :label="`${item.label}(${item.value})`"
-              :value="item.value"
-              v-for="item in methodOptions"
-            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
+          <el-button @click="onSubmit" type="primary">查 询</el-button>
         </el-form-item>
-        <el-form-item>
-          <el-button @click="addUser" type="primary">新增</el-button>
-        </el-form-item>
+        <div  style="float: right; margin-right:20px">
+
+          <el-form-item>
+            <el-button @click="addUser" type="primary">新 增</el-button>
+      
+          </el-form-item>
+        </div>
+
       </el-form>
     </div>
-   <!-- <div class="button-box clearflex">
-      <el-button @click="addUser" type="primary">新增</el-button>
-    </div>  -->
-    <el-table :data="tableData" border stripe>
+    <el-table :data="tableData" :cell-style="cellStyle" border stripe >
   
-      <el-table-column label="序号" min-width="60" prop="ID"></el-table-column>
+      <el-table-column label="序号" type="index" width="50">
+          </el-table-column>
       <el-table-column label="账户" min-width="100" prop="userName"></el-table-column>
       <el-table-column label="姓名" min-width="80" prop="realName"></el-table-column>
-      <el-table-column label="用户角色" min-width="100" prop="authorityId"></el-table-column>
-         <el-table-column label="状态" prop="status" width="80">
-         <template slot-scope="scope">{{scope.row.status|formatBoolean}}</template>
-    </el-table-column>
+      <el-table-column label="用户角色" min-width="100" prop="authorityId">
+          <template slot-scope="scope">{{scope.row.authorityId|formatAuthority}}</template>
+      </el-table-column>
+         
+
       <el-table-column label="手机号" min-width="100" prop="phone"></el-table-column>
       <el-table-column label="邮箱" min-width="120" prop="email"></el-table-column>
       <el-table-column label="是否启用" prop="switch" width="80">
         <template slot-scope="scope">
-          <el-switch  v-model="scope.row.switch"></el-switch>
+          <el-switch  
+          v-model="scope.row.status"
+          :active-value="true"
+          :inactive-value="false"
+          @change="changeSwitch( $event,scope.row,scope.$index)">
+          
+          </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="150">
-      
-        
+      <el-table-column label="操作" min-width="150" >
+     
         <template slot-scope="scope">
-        <el-button type="text" size="small" @click="updateUser(scope.row)">编辑</el-button>
-        <el-button type="text" size="small" @click="updatePassword(scope.row)">修改密码</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除此用户吗</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteUser(scope.row)">确定</el-button>
-            </div>
-           
-            <el-button type="text"  size="small" slot="reference">删除</el-button>
-
-          </el-popover>
+        <el-button type="text" size="small" @click="updateUser(scope.row)">
+            <div style="color: #1677FF">编辑</div>
+        </el-button>
+        <el-button type="text" size="small" @click="updatePassword(scope.row)">
+            <div style="color: #1677FF">修改密码</div>
+        </el-button>
+        <el-button type="text" size="small" @click="deleteUser(scope.row.ID)" >
+            <div style="color: #FF3B30">删除</div>
+        </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -107,7 +113,7 @@
 
 
 
-    <el-dialog :visible.sync="updatePasswordDialog" custom-class="password-dialog" title="修改密码">
+    <el-dialog :visible.sync="updatePasswordDialog" custom-class="password-dialog" title="修改密码" width="440px">
       <el-form :rules="rules" ref="passwordForm" :model="passwordInfo">
         <el-form-item label="请输入原密码" label-width="120px" prop="originalPassword">
           <el-input v-model="passwordInfo.originalPassword"></el-input>
@@ -129,16 +135,16 @@
 
 
 
-    <el-dialog :visible.sync="addUserDialog" custom-class="user-dialog" title="新建账号">
+    <el-dialog :visible.sync="addUserDialog" custom-class="user-dialog" title="新建账号" width="540px">
       <el-form :rules="rules" ref="userForm" :model="userInfo">
-        <el-form-item label="账户" label-width="120px" prop="username">
-          <el-input v-model="userInfo.username"></el-input>
+        <el-form-item label="账户" label-width="120px" prop="userName">
+          <el-input v-model="userInfo.userName"></el-input>
         </el-form-item>
         <el-form-item label="请输入密码" label-width="120px" prop="password">
-          <el-input v-model="userInfo.password"></el-input>
+          <el-input v-model="userInfo.password" show-password></el-input>
         </el-form-item>
         <el-form-item label="再次确认密码" label-width="120px" prop="confirmPassword">  
-          <el-input v-model="userInfo.confirmPassword"></el-input>
+          <el-input v-model="userInfo.confirmPassword" show-password></el-input>
         </el-form-item>
        <!-- <el-form-item label="头像" label-width="100px">
           <div style="display:inline-block" @click="openHeaderChange">
@@ -172,7 +178,37 @@
         <el-button @click="enterAddUserDialog" type="primary">确 定</el-button>
       </div>
     </el-dialog>
-    <ChooseImg ref="chooseImg" :target="userInfo" :targetKey="`headerImg`"/>
+     <el-dialog :visible.sync="updateUserDialog" custom-class="user-dialog" title="编辑用户" width="540px">
+      <el-form :rules="rules" ref="updateForm" :model="formInfo">
+        <el-form-item label="账户" label-width="120px" prop="userName">
+          <el-input v-model="formInfo.userName"></el-input>
+        </el-form-item>
+        <el-form-item label="用户角色" label-width="120px" prop="authorityId">
+     
+          <el-cascader
+            @change="changeAuthority(scope.row)"
+            v-model="formInfo.authorityId"
+            :options="authOptions"
+            :show-all-levels="false"
+            :props="{ checkStrictly: true,label:'authorityName',value:'authorityId',disabled:'disabled',emitPath:false}"
+            filterable
+          ></el-cascader>
+        </el-form-item>
+           <el-form-item label="姓名" label-width="120px" prop="realName">
+          <el-input v-model="formInfo.realName"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" label-width="120px" prop="email">
+          <el-input v-model="formInfo.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" label-width="120px" prop="phone">
+          <el-input v-model="formInfo.phone"></el-input>
+        </el-form-item>
+      </el-form>
+      <div class="dialog-footer" slot="footer">
+        <el-button @click="closeUpdateDialog">取 消</el-button>
+        <el-button @click="enterUpdateDialog" type="primary">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -185,7 +221,11 @@ import {
   setUserAuthority,
   register,
   deleteUser,
-  changePassword
+  updateUserStatus,
+  updateUser,
+  changePassword,
+  getUserInfoById,
+  updateUserInfo
 } from "@/api/user";
 import infoList from "@/mixins/infoList";
 import { mapGetters } from "vuex";
@@ -199,8 +239,9 @@ export default {
       path: path,
       authOptions: [],
       addUserDialog: false,
+      updateUserDialog:false,
       userInfo: {
-        username: "",
+        userName: "",
         password: "",
         confirmPassword: "",
         headerImg: "",
@@ -209,8 +250,15 @@ export default {
         email:"",
         phone:""
       },
+      formInfo: {
+        userName: "",
+        authorityId: "",
+        realName:"",
+        email:"",
+        phone:""
+      },
       rules: {
-        username: [
+        userName: [
           { required: true, message: "请输入账户名", trigger: "blur" },
           { min: 5, message: "最低5位字符", trigger: "blur" }
         ],
@@ -280,6 +328,7 @@ export default {
         confirmNewPW: "",
       },
       userName:"",
+      id:"",
     };
   },
   computed: {
@@ -292,9 +341,42 @@ export default {
       } else {
         return "";
       }
+    },
+    formatAuthority:function(authority){
+      if (authority != null) {
+        return authority=='1' ? "应用管理员" :"运维管理员";
+      } else {
+        return "";
+      }
     }
   },
   methods: {
+    
+    async changeSwitch(data,row,index) {
+     
+      const res = await updateUserStatus({
+        ID: row.ID,
+        row: row
+      });
+      if (res.code == 200) {
+        let newData=row;
+        newData.status=newData.status==true?true:false;
+        this.tableData[index]=newData;
+        this.$message({ type: "success", message: "状态修改成功" });
+      }else{
+        let newData=row;
+        newData.status=newData.status==true?false:true;
+        this.tableData[index]=newData;
+         this.$message({ type: "fail", message: "状态修改失败" });
+      }
+    },
+    async updateUser(row){
+        const res = await getUserInfoById({ ID: row.ID });
+        if (res.code ==200) {
+          this.formInfo = res.data;
+          this.updateUserDialog = true;
+        }
+    },
     openHeaderChange(){
       this.$refs.chooseImg.open()
     },
@@ -323,12 +405,28 @@ export default {
         });
     },
     //删除用户
-    async deleteUser(row) {
-      const res = await deleteUser({ id: row.ID });
-      if (res.code == 200) {
-        this.getTableData();
-        row.visible = false;
-      }
+     deleteUser(ID) {
+        this.$confirm("删除该用户可能带来无法预测的后果，您确定删除该用户吗？?", "确认要删除这条信息吗？", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning"
+        })
+        .then(async () => {
+          const res = await deleteUser({ ID });
+          if (res.code == 200) {
+            this.$message({
+              type: "success",
+              message: "删除成功!"
+            });
+            this.getTableData();
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
     },
     //添加用户
     async enterAddUserDialog() {
@@ -347,6 +445,21 @@ export default {
     closeAddUserDialog() {
       this.$refs.userForm.resetFields();
       this.addUserDialog = false;
+    },
+    closeUpdateDialog(){
+      this.updateUserDialog = false;
+    },
+    enterUpdateDialog(){
+      this.$refs.updateForm.validate(async valid => {
+        if (valid) {
+          const res = await updateUserInfo(this.formInfo);
+          if (res.code == 200) {
+            this.$message({ type: "success", message: "编辑成功" });
+          }
+          await this.getTableData();
+          this.closeUpdateDialog();
+        }
+      });
     },
     handleAvatarSuccess(res) {
       this.userInfo.headerImg = res.data.file.url;
@@ -392,6 +505,11 @@ export default {
     onSubmit() {
       this.page = 1
       this.limit = 10
+      if(this.searchInfo.status==''){
+          delete this.searchInfo.status;
+      }else if(this.searchInfo.authorityId==''){
+          delete this.searchInfo.authorityId;
+      }
       this.getTableData()
     }
   },
@@ -406,15 +524,15 @@ export default {
 			"CreatedAt": "2020-10-26T11:55:37+08:00",
 			"UpdatedAt": "2020-10-26T11:55:37+08:00",
 			"DeletedAt": null,
-			"authorityId": "888",
-			"authorityName": "普通用户",
+			"authorityId": "1",
+			"authorityName": "应用管理员",
 			"parentId": "0",
 			"dataAuthorityId": [{
 				"CreatedAt": "2020-10-26T11:55:37+08:00",
 				"UpdatedAt": "2020-10-26T11:55:37+08:00",
 				"DeletedAt": null,
-				"authorityId": "888",
-				"authorityName": "普通用户",
+				"authorityId": "1",
+				"authorityName": "应用管理员",
 				"parentId": "0",
 				"dataAuthorityId": null,
 				"children": null,
@@ -423,58 +541,28 @@ export default {
 				"CreatedAt": "2020-10-26T11:55:37+08:00",
 				"UpdatedAt": "2020-10-26T11:55:37+08:00",
 				"DeletedAt": null,
-				"authorityId": "8881",
-				"authorityName": "普通用户子角色",
-				"parentId": "888",
-				"dataAuthorityId": null,
-				"children": null,
-				"menus": null
-			}, {
-				"CreatedAt": "2020-10-26T11:55:37+08:00",
-				"UpdatedAt": "2020-10-26T11:55:37+08:00",
-				"DeletedAt": null,
-				"authorityId": "9528",
-				"authorityName": "测试角色",
+				"authorityId": "2",
+				"authorityName": "运维管理员",
 				"parentId": "0",
 				"dataAuthorityId": null,
 				"children": null,
 				"menus": null
 			}],
-			"children": [{
-				"CreatedAt": "2020-10-26T11:55:37+08:00",
-				"UpdatedAt": "2020-10-26T11:55:37+08:00",
-				"DeletedAt": null,
-				"authorityId": "8881",
-				"authorityName": "普通用户子角色",
-				"parentId": "888",
-				"dataAuthorityId": [],
-				"children": [],
-				"menus": null
-			}],
+			
 			"menus": null
 		}, {
 			"CreatedAt": "2020-10-26T11:55:37+08:00",
 			"UpdatedAt": "2020-10-26T11:55:37+08:00",
 			"DeletedAt": null,
-			"authorityId": "9528",
-			"authorityName": "测试角色",
+			"authorityId": "2",
+			"authorityName": "运维管理员",
 			"parentId": "0",
-			"dataAuthorityId": [{
+			"dataAuthorityId": [ {
 				"CreatedAt": "2020-10-26T11:55:37+08:00",
 				"UpdatedAt": "2020-10-26T11:55:37+08:00",
 				"DeletedAt": null,
-				"authorityId": "8881",
-				"authorityName": "普通用户子角色",
-				"parentId": "888",
-				"dataAuthorityId": null,
-				"children": null,
-				"menus": null
-			}, {
-				"CreatedAt": "2020-10-26T11:55:37+08:00",
-				"UpdatedAt": "2020-10-26T11:55:37+08:00",
-				"DeletedAt": null,
-				"authorityId": "9528",
-				"authorityName": "测试角色",
+				"authorityId": "2",
+				"authorityName": "运维管理员",
 				"parentId": "0",
 				"dataAuthorityId": null,
 				"children": null,

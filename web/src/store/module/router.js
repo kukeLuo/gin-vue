@@ -51,31 +51,11 @@ export const router = {
                 "CreatedAt": "2020-10-26T11:55:37+08:00",
                 "UpdatedAt": "2020-10-26T11:55:37+08:00",
                 "parentId": "0",
-                "path": "dashboard",
-                "name": "dashboard",
-                "hidden": false,
-                "component": "view/dashboard/component/animition.vue",
-                "sort": 1,
-                "meta": {
-                    "keepAlive": false,
-                    "defaultMenu": false,
-                    "title": "仪表盘",
-                    "icon": "setting"
-                },
-                "authoritys": null,
-                "menuId": "1",
-                "children": null,
-                "parameters": []
-            }, {
-                "ID": 3,
-                "CreatedAt": "2020-10-26T11:55:37+08:00",
-                "UpdatedAt": "2020-10-26T11:55:37+08:00",
-                "parentId": "0",
                 "path": "admin",
                 "name": "superAdmin",
                 "hidden": false,
                 "component": "view/superAdmin/index.vue",
-                "sort": 3,
+                "sort": 1,
                 "meta": {
                     "keepAlive": false,
                     "defaultMenu": false,
@@ -83,12 +63,12 @@ export const router = {
                     "icon": "user-solid"
                 },
                 "authoritys": null,
-                "menuId": "3",
+                "menuId": "1",
                 "children": [{
                     "ID": 4,
                     "CreatedAt": "2020-10-26T11:55:37+08:00",
                     "UpdatedAt": "2020-10-26T11:55:37+08:00",
-                    "parentId": "3",
+                    "parentId": "1",
                     "path": "cockpit",
                     "name": "cockpit",
                     "hidden": false,
@@ -108,7 +88,7 @@ export const router = {
                     "ID": 23,
                     "CreatedAt": "2020-10-26T11:55:37+08:00",
                     "UpdatedAt": "2020-10-26T11:55:37+08:00",
-                    "parentId": "3",
+                    "parentId": "1",
                     "path": "network",
                     "name": "network",
                     "hidden": false,
@@ -126,7 +106,88 @@ export const router = {
                     "parameters": []
                 }],
                 "parameters": []
-            },  {
+            }, {
+				"ID": 35,
+				"CreatedAt": "2020-10-26T11:55:37+08:00",
+				"UpdatedAt": "2020-10-26T11:55:37+08:00",
+				"parentId": "3",
+				"path": "cpuDetail",
+				"name": "cpuDetail",
+				"hidden": true,
+				"component": "view/host/cpu/cpuDetail.vue",
+				"sort": 1,
+				"meta": {
+					"keepAlive": false,
+					"defaultMenu": false,
+					"title": "CPU性能",
+					"icon": "s-order"
+				},
+				"authoritys": null,
+				"menuId": "35",
+				"children": null,
+				"parameters": []
+			},{
+				"ID": 33,
+				"CreatedAt": "2020-10-26T11:55:37+08:00",
+				"UpdatedAt": "2020-10-26T11:55:37+08:00",
+				"parentId": "3",
+				"path": "appDetail/:id/:name/:skillId",
+				"name": "appDetail",
+				"hidden": true,
+				"component": "view/appStore/appManager/appDetail.vue",
+				"sort": 1,
+				"meta": {
+					"keepAlive": false,
+					"defaultMenu": false,
+					"title": "应用事件",
+					"icon": "s-order"
+				},
+				"authoritys": null,
+				"menuId": "33",
+				"children": null,
+				"parameters": []
+            }, 
+            {
+				"ID": 1001,
+				"CreatedAt": "2020-10-26T11:55:37+08:00",
+				"UpdatedAt": "2020-10-26T11:55:37+08:00",
+				"parentId": "3",
+				"path": "deviceEvents/:id",
+				"name": "deviceEvents",
+				"hidden": true,
+				"component": "view/systemTools/autoCode/deviceEvents.vue",
+				"sort": 1,
+				"meta": {
+					"keepAlive": false,
+					"defaultMenu": false,
+					"title": "设备事件",
+					"icon": "s-order"
+				},
+				"authoritys": null,
+				"menuId": "33",
+				"children": null,
+				"parameters": []
+			},{
+				"ID": 34,
+				"CreatedAt": "2020-10-26T11:55:37+08:00",
+				"UpdatedAt": "2020-10-26T11:55:37+08:00",
+				"parentId": "3",
+				"path": "appConfig/:id/:name/:skillId",
+				"name": "appConfig",
+				"hidden": true,
+				"component": "view/appStore/appManager/appConfig.vue",
+				"sort": 1,
+				"meta": {
+					"keepAlive": false,
+					"defaultMenu": false,
+					"title": "应用配置",
+					"icon": "s-order"
+				},
+				"authoritys": null,
+				"menuId": "34",
+				"children": null,
+				"parameters": []
+			}, {
                 "ID": 4,
                 "CreatedAt": "2020-10-26T11:55:37+08:00",
                 "UpdatedAt": "2020-10-26T11:55:37+08:00",
@@ -153,7 +214,7 @@ export const router = {
                     "name": "appManager",
                     "hidden": false,
                     "component": "view/appStore/appManager/appManager.vue",
-                    "sort": 1,
+                    "sort": 0,
                     "meta": {
                         "keepAlive": true,
                         "defaultMenu": false,
@@ -164,7 +225,28 @@ export const router = {
                     "menuId": "30",
                     "children": null,
                     "parameters": []
-                }],
+                },{
+                    "ID": 31,
+                    "CreatedAt": "2020-10-26T11:55:37+08:00",
+                    "UpdatedAt": "2020-10-26T11:55:37+08:00",
+                    "parentId": "4",
+                    "path": "dictionary",
+                    "name": "dictionary",
+                    "hidden": false,
+                    "component": "view/appStore/appManager/dictionary.vue",
+                    "sort": 1,
+                    "meta": {
+                        "keepAlive": true,
+                        "defaultMenu": false,
+                        "title": "字典管理",
+                        "icon": "s-order"
+                    },
+                    "authoritys": null,
+                    "menuId": "31",
+                    "children": null,
+                    "parameters": []
+                }
+            ],
                 "parameters": []
             }, {
                 "ID": 8,
@@ -231,10 +313,10 @@ export const router = {
                 "CreatedAt": "2020-10-26T11:55:37+08:00",
                 "UpdatedAt": "2020-10-26T11:55:37+08:00",
                 "parentId": "0",
-                "path": "example",
-                "name": "example",
+                "path": "news",
+                "name": "news",
                 "hidden": false,
-                "component": "view/example/index.vue",
+                "component": "view/news/index.vue",
                 "sort": 6,
                 "meta": {
                     "keepAlive": false,
@@ -249,10 +331,10 @@ export const router = {
                     "CreatedAt": "2020-10-26T11:55:37+08:00",
                     "UpdatedAt": "2020-10-26T11:55:37+08:00",
                     "parentId": "9",
-                    "path": "table",
-                    "name": "table",
+                    "path": "systemNews",
+                    "name": "systemNews",
                     "hidden": false,
-                    "component": "view/example/table/table.vue",
+                    "component": "view/news/systemNews/systemNews.vue",
                     "sort": 1,
                     "meta": {
                         "keepAlive": false,
@@ -305,14 +387,14 @@ export const router = {
                 "authoritys": null,
                 "menuId": "26",
                 "children": [{
-                    "ID": 30,
+                    "ID": 39,
                     "CreatedAt": "2020-10-26T11:55:37+08:00",
                     "UpdatedAt": "2020-10-26T11:55:37+08:00",
                     "parentId": "26",
                     "path": "operation",
                     "name": "operation",
                     "hidden": false,
-                    "component": "view/systemConfig/parameter/configuration.vue",
+                    "component": "view/systemConfig/parameter/parameter.vue",
                     "sort": 1,
                     "meta": {
                         "keepAlive": false,
@@ -321,11 +403,11 @@ export const router = {
                         "icon": "cpu"
                     },
                     "authoritys": null,
-                    "menuId": "30",
+                    "menuId": "39",
                     "children": null,
                     "parameters": []
                 },{
-                    "ID": 31,
+                    "ID": 38,
                     "CreatedAt": "2020-10-26T11:55:37+08:00",
                     "UpdatedAt": "2020-10-26T11:55:37+08:00",
                     "parentId": "26",
@@ -341,7 +423,7 @@ export const router = {
                         "icon": "s-order"
                     },
                     "authoritys": null,
-                    "menuId": "31",
+                    "menuId": "38",
                     "children": null,
                     "parameters": []
                 },{

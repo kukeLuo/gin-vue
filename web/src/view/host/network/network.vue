@@ -1,135 +1,231 @@
+
 <template>
-  <div class="app-container">
-    <div class="filter-container" >
-      <el-button class="filter-item" type="success"  >全部处理</el-button>
+    <div class="container">
+
+            <el-divider direction="vertical" class="top-line"></el-divider>
+            
+            <span class="top-text"><b>网络状态</b></span>
+            <el-row class="box" >
+                <el-col :span="3" class="el-col-left">
+                    <div class="main">
+                        <img src="@/assets/wan.png" class="assets-icon-big"/>
+                    </div>
+                    <div class="main-text">
+                        <span>5G移动网络/有线WAN</span>
+                    </div>
+                </el-col>
+                <el-col :span="5">
+                        
+                    <el-row class="main-text">
+                        <span class="direction-text">{{this.checkIsAlive| formatStatus}}</span>
+                    </el-row>
+                    <el-divider direction="horizontal">
+                         <div :class="{'horizontal-line-red':isRed,'horizontal-line-green':isGreen}">
+                            
+                        </div>
+                    </el-divider>
+                </el-col>
+                <el-col :span="3">
+                <div class="main">
+                        <img src="@/assets/bie-service.png" class="assets-icon-big"/>
+                    </div>
+                    <div class="main-text">
+                        <span class="direction-text">BIE服务器</span>
+                    </div>
+                 
+                </el-col>
+                <el-col :span="5">       
+                    <el-row class="main-text">
+                        <span >5G移动网络/有线WAN</span>
+                    </el-row>
+                    <el-divider direction="horizontal" >
+                        <div :class="{'horizontal-line-red':isRed,'horizontal-line-green':isGreen}">
+                            
+                        </div>
+                    </el-divider>       
+                    
+                </el-col>
+                <el-col :span="2">
+
+                <div class="main">
+                        <img src="@/assets/camera.png" class="assets-icon-big"/>
+                    </div>
+                    <div class="main-text">
+                        <span class="direction-text">终端管理</span>
+                    </div>
+                
+                </el-col>
+            </el-row>
+                    
+      
+            <div class="top" >
+                        <el-divider direction="vertical" class="top-line"></el-divider>
+                        
+                        <span class="top-text"><b>网络配置</b></span>
+            </div>
+            <div class = "top-content" style=" margin-top: 2px">
+            
+                    <iframe id="content" src="http://192.168.2.1/wizard.asp"  width="100%" height="100%" ></iframe>
+            </div> 
+                        
+           
+        
     </div>
-    <el-table :data="tableData" tooltip-effect="dark"  @selection-change="handleSelectionChange"  :cell-style="cellStyle" fit highlight-current-row>
-      <el-table-column  type="selection" width="55" :selectable="isDisabled"></el-table-column>
-      <el-table-column label="确认" align="center" width="80">
-        <template slot-scope="scope">
-          <el-button  type="success" size="mini" :disabled="scope.row.confirm" @click="confirmHandle(scope.row.pointId)"> {{scope.row.confirm?'已确认':'确认'}}</el-button>
-        </template>
-      </el-table-column>
-      <el-table-column label="详情" align="center" width="80">
-        <template slot-scope="scope">
-          <el-button  type="primary" size="mini" >详情</el-button>
-        </template>
-      </el-table-column>
-      <el-table-column prop="alarmLevel" label="告警级别" align="center" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="area" label="区域" align="center"></el-table-column>
-      <el-table-column prop="equip" label="设备" align="center" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="pointName" label="测点" align="center" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="limit" label="限值" align="center" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="alarmValue" label="报警值" align="center" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="alarmTime" label="报警时间" align="center" show-overflow-tooltip></el-table-column>
-    </el-table>
-  </div>
 </template>
 
+
 <script>
-import { mapGetters } from 'vuex'
+// 获取列表内容封装在mixins内部  getTableData方法 初始化已封装完成
+
+import {getSystemCenterList,getAppManagerList} from "@/api/cockpit";
+import infoList from "@/mixins/infoList";
+import { mapGetters } from "vuex";
 export default {
-  name: 'Dashboard',
+  name: "Network",
+  mixins: [infoList],
   data() {
     return {
-        tableData: [{
-          confirm:true,
-          alarmLevel:"紧急告警",
-          area:"北京市昌平区",
-          equip:"昌平气象采集",
-          pointId:1,
-          pointName:"温度",
-          limit:"35",
-          alarmValue:"41",
-          alarmTime:"2019-6-1 12:00:00",
-        },{
-          confirm:false,
-          alarmLevel:"一般告警",
-          area:"北京市朝阳区",
-          equip:"昌平光感采集",
-          pointId:2,
-          pointName:"紫外线",
-          limit:"60",
-          alarmValue:"61",
-          alarmTime:"2019-6-1 12:00:00",
+          appStatistics: {
+            "applicationList": [],
+			"installCount": "",
+			"systemCount": "",
+            "deviceCount": "",
+            "sceneCount": "",
+		  },
+           exceptionCount:"",
+          checkIsAlive:"",
+          isGreen:false,
+          isRed:true,
+          isWanGreen:false,
+          isWanRed:true,
+        };
+  },
+    created() {
+        //this.reSetSize();
+        this.systemCenterList();
+       // this.getAppManagers();
+  },
+  methods: {
+       reSetSize() {
+            var windowsHeight = window.innerHeight;
+            document.getElementById("content").style.height = (windowsHeight-框架顶部高度) + "px";
         },
-          {
-            confirm:false,
-            alarmLevel:"紧急告警",
-            area:"北京市朝阳区",
-            equip:"昌平光感采集",
-            pointId:3,
-            pointName:"紫外线",
-            limit:"60",
-            alarmValue:"61",
-            alarmTime:"2019-6-1 12:00:00",
-          }],
-        multipleSelection: []
-    }
+         systemCenterList() {
+            getSystemCenterList({}).then((ele) => {
+            
+                this.checkIsAlive=ele.data.checkIsAlive;
+                if(this.checkIsAlive){
+                    this.isWanGreen=true,
+                    this.isWanRed=false
+                }else{
+                    this.isWanGreen=false,
+                    this.isWanRed=true
+                }
+                this.exceptionCount=ele.data.deviceConnNum.ExceptionCount;
+                if(this.exceptionCount=='0'){
+                    this.isGreen=true,
+                    this.isRed=false
+                }else{
+                    this.isGreen=false,
+                    this.isRed=true
+                }
+               
+            });
+        },
+        getAppManagers() {
+            getAppManagerList({}).then((ele) => {
+                this.appStatistics=ele.data.data;
+            });
+        },
   },
-   computed: {
-    ...mapGetters('user', ['userInfo'])
-  },
-    
-    methods:{
-      toTarget(name){
-          this.$router.push({name})
+   
+  filters: {
+        formatStatus: function(status) {
+          if (status != null) {
+           return status==true?"网络正常":"网络异常";
+          } else {
+            return "未定义类型";
+          }
+        },    
       },
-      cellStyle(row,column,rowIndex,columnIndex){//根据报警级别显示颜色
-        // console.log(row);
-        // console.log(row.column);
-        if(row.column.label==="告警级别"&& row.row.alarmLevel==="紧急告警"){
-          return 'color:red'
-        }else if(row.column.label==="告警级别"&& row.row.alarmLevel==="一般告警" ){
-          return 'color:yellow'
-        }
-      }
-    },
-}
+
+};
 </script>
 
-<style lang="scss" scoped>
-    .big{
-        margin:100px 0 0 0;
-        padding-top: 0;
-        background-color: rgb(243,243,243);
-        padding-top: 15px;
-        .top{
-            width: 100%;
-            height: 360px;
-            margin-top: 20px;
-            overflow: hidden;
-            .chart-container{
-                position: relative;
-                width: 100%;
-                height: 100%;
-                padding: 20px;
-                background-color: #fff;
-            }
+ <style>
+        *{
+            margin: 0;
+            padding: 0;
         }
-        .mid{
+ 
+        html,body{
             width: 100%;
-            height: 380px;
-            .chart-wrapper {
-                height: 340px;
-                background: #fff;
-                padding: 16px 16px 0;
-                margin-bottom: 32px;
-            }
+            height: 100%;
         }
-        .bottom{
+ 
+        .container{
             width: 100%;
-            height: 300px;
-            // margin: 20px 0;
-            .el-row{
-                margin-right: 4px !important;
-            }
-            .chart-player{
-                width: 100%;
-                height: 270px;
-                padding: 10px;
-                background-color: #fff;
-            }
+            height: 100%;
+              position: relative;
         }
-    }
-</style>
+ 
+        .top-content{
+            width: 100%;
+            height: 600px;
+            margin-top: 2px;
+            background: #fff;
+        
+        }  
+         .main {
+            display:flex;
+            justify-content:center;
+            align-items:center;
+         }
+         .top-content-status{
+            width: 100%;
+            height: 200px;
+            margin-top: 2px;
+            background: #fff;
+        
+        } 
+        .top-line{
+            width: 3px;
+            height: 16px;
+            background: #007aff;
+        }
+        .main-text{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            margin-top:31px;
+        }
+        .direction-row{
+            width: 100%;
+            height: 56px;
+        }
+        .horizontal-line-red{
+            width: 267px;
+            border-top: 2px dashed red;
+        }
+         .horizontal-line-green{
+            width: 267px;
+            border-top: 2px dashed green;
+        }
+        /* el-divider 修改高度&虚线效果 */
+        .el-divider--horizontal{
+            margin: 4px 20px 0 0;
+            background: 0 0;
+        } 
+        .assets-icon-big {
+            width: 64px;
+            height: 64px;
+        }
+         .assets-icon-small {
+            width: 44px;
+            height: 44px;
+            margin-left:24px;
+        }
+        .el-col-left{
+            margin-left:84px;
+        }
+    </style>

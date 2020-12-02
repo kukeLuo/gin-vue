@@ -49,7 +49,7 @@ export const user = {
                     router.push({ path: redirect })
                 } else {
                     console.log("--module/user.js redirect2:"+redirect);
-                    // router.push({ path: '/layout/dashboard' })
+                     router.push({ path: '/layout/admin/cockpit' })
                 }
             }
         },

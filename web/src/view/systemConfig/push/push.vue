@@ -1,205 +1,145 @@
 <template>
-  <div>
-    <div class="button-box clearflex">
-      <el-button @click="addMenu('0')" type="primary">新增根菜单</el-button>
-    </div>
+   <div>
 
-    <!-- 由于此处菜单跟左侧列表一一对应所以不需要分页 pageSize默认999 -->
-    <el-table :data="tableData" border row-key="ID" stripe>
-      <el-table-column label="ID" min-width="100" prop="ID"></el-table-column>
-      <el-table-column label="路由Name" min-width="160" prop="name"></el-table-column>
-      <el-table-column label="路由Path" min-width="160" prop="path"></el-table-column>
-      <el-table-column label="是否隐藏" min-width="100" prop="hidden">
+        <el-table :data="tableData" border stripe>
+       <el-table-column label="是否启用" prop="switch" width="80">
         <template slot-scope="scope">
-          <span>{{scope.row.hidden?"隐藏":"显示"}}</span>
+          <el-switch  v-model="scope.row.status"
+          :active-value="1"
+          :inactive-value="0"
+          @change="changeSwitch( $event,scope.row,scope.$index)"
+          >
+          
+          
+          </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="父节点" min-width="90" prop="parentId"></el-table-column>
-      <el-table-column label="排序" min-width="70" prop="sort"></el-table-column>
-      <el-table-column label="文件路径" min-width="360" prop="component"></el-table-column>
-      <el-table-column label="展示名称" min-width="120" prop="authorityName">
-        <template slot-scope="scope">
-          <span>{{scope.row.meta.title}}</span>
-        </template>
+      <el-table-column label="告警名称" min-width="60" prop="ruleName"></el-table-column>
+      <el-table-column label="规则描述" min-width="150" prop="description"></el-table-column>
+   
+
+      <el-table-column label="告警等级" prop="alertLevel" width="100">
+
+          <template slot-scope="scope">{{scope.row.alertLevel|formatBoolean}}</template>
       </el-table-column>
-      <el-table-column label="图标" min-width="140" prop="authorityName">
-        <template slot-scope="scope">
-          <i :class="`el-icon-${scope.row.meta.icon}`"></i>
-          <span>{{scope.row.meta.icon}}</span>
-        </template>
+
+      <el-table-column label="推送方式" min-width="100" prop="notificationType">
+         <template slot-scope="scope">{{scope.row.notificationType|formatString}}</template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="300">
+      
+      <el-table-column label="操作" min-width="50">
+      
+      
         <template slot-scope="scope">
-          <el-button
-            @click="addMenu(scope.row.ID)"
-            size="small"
-            type="primary"
-            icon="el-icon-edit"
-          >添加子菜单</el-button>
-          <el-button
-            @click="editMenu(scope.row.ID)"
-            size="small"
-            type="primary"
-            icon="el-icon-edit"
-          >编辑</el-button>
-          <el-button
-            @click="deleteMenu(scope.row.ID)"
-            size="small"
-            type="danger"
-            icon="el-icon-delete"
-          >删除</el-button>
+        <el-button type="text" size="small" @click="updateRules(scope.row)">编辑</el-button>
+        
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :current-page="page"
+      :page-size="limit"
+      :page-sizes="[10, 30, 50, 100]"
+      :style="{float:'right',padding:'20px'}"
+      :total="total"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+      layout="total, sizes, prev, pager, next, jumper"
+    ></el-pagination>
+        <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="编辑基础监控" width="540px" >
+      <el-form ref="elForm" :model="formData"  size="medium" label-width="110px">
+      <el-form-item label="策略名称" prop="ruleName">
+        <el-input v-model="formData.ruleName" :disabled="true"
+        placeholder="" clearable :style="{width: '90%'}" size="small"></el-input>
+      </el-form-item>
+      <el-form-item label="告警规则:" prop="type">
+            
 
-    <el-dialog :before-close="handleClose" :title="dialogTitle" :visible.sync="dialogFormVisible">
-      <el-form
-        :inline="true"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-        label-width="85px"
-        ref="menuForm"
-      >
-        <el-form-item label="路由name" prop="path" style="width:30%">
-          <el-input
-            @change="changeName"
-            autocomplete="off"
-            placeholder="唯一英文字符串"
-            v-model="form.name"
-          ></el-input>
-        </el-form-item>
-        <el-form-item prop="path" style="width:30%">
-          <div style="display:inline-block" slot="label">
-            路由path
-            <el-checkbox style="float:right;margin-left:20px;" v-model="checkFlag">添加参数</el-checkbox>
-          </div>
-          <el-input
-            :disabled="!checkFlag"
-            autocomplete="off"
-            placeholder="建议只在后方拼接参数"
-            v-model="form.path"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="是否隐藏" style="width:30%">
-          <el-select placeholder="是否在列表隐藏" v-model="form.hidden">
-            <el-option :value="false" label="否"></el-option>
-            <el-option :value="true" label="是"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="父节点Id" style="width:30%">
-          <el-cascader
-            :disabled="!this.isEdit"
-            :options="menuOption"
-            :props="{ checkStrictly: true,label:'title',value:'ID',disabled:'disabled',emitPath:false}"
-            :show-all-levels="false"
-            filterable
-            v-model="form.parentId"
-          ></el-cascader>
-        </el-form-item>
-        <el-form-item label="文件路径" prop="component" style="width:30%">
-          <el-input autocomplete="off" v-model="form.component"></el-input>
-        </el-form-item>
-        <el-form-item label="展示名称" prop="meta.title" style="width:30%">
-          <el-input autocomplete="off" v-model="form.meta.title"></el-input>
-        </el-form-item>
-        <el-form-item label="图标" prop="meta.icon" style="width:30%">
-          <icon :meta="form.meta">
-            <template slot="prepend">el-icon-</template>
-          </icon>
-        </el-form-item>
-        <el-form-item label="排序标记" prop="sort" style="width:30%">
-          <el-input autocomplete="off" v-model.number="form.sort"></el-input>
-        </el-form-item>
-        <el-form-item label="keepAlive" prop="meta.keepAlive" style="width:30%">
-          <el-select placeholder="是否keepAlive缓存页面" v-model="form.meta.keepAlive">
-            <el-option :value="false" label="否"></el-option>
-            <el-option :value="true" label="是"></el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <div class="warning">新增菜单需要在角色管理内配置权限才可使用</div>
-      <div>
-        <el-button
-          size="small"
-          type="primary"
-          icon="el-icon-edit"
-          @click="addParameter(form)"
-        >新增菜单参数</el-button>
-        <el-table :data="form.parameters" stripe style="width: 100%">
-          <el-table-column prop="type" label="参数类型" width="180">
-            <template slot-scope="scope">
-              <el-select v-model="scope.row.type" placeholder="请选择">
-                <el-option key="query" value="query" label="query"></el-option>
-                <el-option key="params" value="params" label="params"></el-option>
-              </el-select>
-            </template>
-          </el-table-column>
-          <el-table-column prop="key" label="参数key" width="180">
-            <template slot-scope="scope">
-              <div>
-                <el-input v-model="scope.row.key"></el-input>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="value" label="参数值">
-            <template slot-scope="scope">
-              <div>
-                <el-input v-model="scope.row.value"></el-input>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column>
-            <template slot-scope="scope">
-              <div>
-                <el-button
-                  type="danger"
-                  size="small"
-                  icon="el-icon-delete"
-                  @click="deleteParameter(form.parameters,scope.$index)"
-                >删除</el-button>
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
+              <el-col  :span="10">
+                  <div>
+                      <label>CPU持续</label>
+                      <el-input v-model.number="formData.duration" :style="{width: '40%'}" onkeyup="value=value.replace(/[^\d]/g,'')" size="mini"></el-input>
+                      <label>s</label>
+                  </div>  
+              </el-col>
+               <el-col  :span="10">  
+                  <div>
+                      <label>占用率超过</label>
+                      <el-input v-model.number="formData.usageRate" :style="{width: '40%'}" onkeyup="value=value.replace(/[^\d]/g,'')" size="mini"></el-input>
+                      <label>%</label>
+                  </div> 
+              </el-col>
+        
+      </el-form-item>
+      <el-form-item label="告警等级" prop="status" required>
+        <template>
+            <el-radio-group v-model="formData.alertLevel">
+              <el-radio :label="1">一般</el-radio>
+              <el-radio :label="2">提醒</el-radio>
+              <el-radio :label="3">紧急</el-radio>
+            </el-radio-group>
+        </template>
+      </el-form-item>
+      <el-form-item label="通知方式:" prop="desc">
+          <template>
+              <el-checkbox-group v-model="checkList">
+                <el-checkbox label="2">短信</el-checkbox>
+                <el-checkbox label="3">大屏</el-checkbox>
+                <el-checkbox label="1">邮箱</el-checkbox>
+              </el-checkbox-group>
+          </template>
+      </el-form-item>
+    </el-form>
+      
       <div class="dialog-footer" slot="footer">
         <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
+        <el-button @click="commitDialog" type="primary">提 交</el-button>
       </div>
     </el-dialog>
-  </div>
+   </div>
 </template>
 
 <script>
 // 获取列表内容封装在mixins内部  getTableData方法 初始化已封装完成
 
 import {
-  updateBaseMenu,
-  getMenuList,
-  addBaseMenu,
-  deleteBaseMenu,
-  getBaseMenuById
-} from "@/api/menu";
+  getRulesList,
+  getRulesDetail,
+
+  updateRulesStatus,
+  commitRules
+} from "@/api/push";
 import infoList from "@/mixins/infoList";
-import icon from "@/view/superAdmin/menu/icon";
 export default {
-  name: "Menus",
+  name: "Push",
   mixins: [infoList],
   data() {
     return {
       checkFlag: false,
-      listApi: getMenuList,
+      listApi: getRulesList,
       dialogFormVisible: false,
       dialogTitle: "新增菜单",
+      alertLevel: '',
+      checkList: [],
+      formData: {
+        id: "",
+        status: "",
+        ruleName: "",
+        ruleType: "",
+        description: "",
+        duration: "",
+        usageRate: "",
+        alertLevel: "",
+        notificationType: ""
+      },
       menuOption: [
         {
-          ID: "0",
+          id: "0",
           title: "根菜单"
         }
       ],
       form: {
-        ID: 0,
+        id: 0,
         path: "",
         name: "",
         hidden: "",
@@ -213,185 +153,142 @@ export default {
         },
         parameters: []
       },
-      rules: {
-        path: [{ required: true, message: "请输入菜单name", trigger: "blur" }],
-        component: [
-          { required: true, message: "请输入文件路径", trigger: "blur" }
-        ],
-        "meta.title": [
-          { required: true, message: "请输入菜单展示名称", trigger: "blur" }
-        ]
-      },
-      isEdit: false,
-      test: ""
+      
     };
   },
-  components: {
-    icon
+
+  filters: {
+
+    formatBoolean: function(bool) {
+      if (bool != null) {
+        if(bool===1){
+          return "一般";
+        }else if (bool===2){
+             return "提醒";
+        }else if(bool===3){
+          return "紧急";
+        }else{
+          return "未定义类型";
+        }
+      } else {
+        return "";
+      }
+    },
+    formatString: function(string) {
+      var pushMode="";
+      if(string.indexOf(",") != -1){
+        var stringSplit=string.split(",");
+        for(var i=0;i<stringSplit.length;i++){
+          
+          if (stringSplit[i] != null) {
+            console.log("--------------------"+stringSplit[i]);
+
+            if(stringSplit[i] ==1){
+              if(pushMode===""){
+
+                    pushMode="邮件通知";
+                  }else{
+
+                    pushMode=pushMode+"、"+"邮件通知";
+                  }
+             
+            }else if (stringSplit[i] ==2){
+
+                  if(pushMode===""){
+
+                      pushMode="钉钉通知";
+                  }else{
+
+                    pushMode=pushMode+"、"+"钉钉通知";
+                  }
+            }else if(stringSplit[i] ==3){
+              if(pushMode===""){
+                      pushMode="大屏通知";
+                  }else{
+                    pushMode=pushMode+"、"+"大屏通知";
+                  }
+            }else{
+              return "未定义类型";
+            }
+          } else {
+            return "";
+          }
+        }
+      }else{
+          if(string==3){
+            pushMode="大屏通知";
+          }else if(string==2){
+              pushMode="钉钉通知";
+          }else if(string==1){
+             pushMode="邮件通知";
+          }else{
+              pushMode="未定义类型";
+          }
+      }
+
+
+      return pushMode;
+    }
   },
   methods: {
-    addParameter(form) {
-      if (!form.parameters){
-        this.$set(form,"parameters",[])
+    async updateRules(row) {
+
+      const res = await getRulesDetail({ id: row.id });
+      this.checkList=new Array();
+      if (res.code == 200) {
+        this.formData = res.data;
+        this.dialogFormVisible = true;
+        var type=res.data.notificationType;
+        if(type.indexOf(",") != -1){
+           var stringSplit=type.split(",");
+             for(var i=0;i<stringSplit.length;i++){
+               this.checkList.push(stringSplit[i]);
+             }
+        }else{
+          this.checkList.push(type);
+        }
       }
-      form.parameters.push({
-        type: "query",
-        key: "",
-        value: ""
+    },
+    async changeSwitch(data,row,index) {
+      console.log("----------2----------------------"+JSON.stringify(data)+"---3--"+JSON.stringify(row));
+      const res = await updateRulesStatus({
+        id: row.id,
+        row: row
       });
+      if (res.code == 200) {
+        let newData=row;
+        newData.status=newData.status==0?0:1;
+        this.tableData[index]=newData;
+        this.$message({ type: "success", message: "状态修改成功" });
+      }else{
+        let newData=row;
+        newData.status=newData.status==1?0:1;
+        this.tableData[index]=newData;
+         this.$message({ type: "fail", message: "状态修改失败" });
+      }
     },
-    deleteParameter(parameters, index) {
-      parameters.splice(index, 1);
-    },
-    changeName() {
-      this.form.path = this.form.name;
-    },
-    setOptions() {
-      this.menuOption = [
-        {
-          ID: "0",
-          title: "根目录"
-        }
-      ];
-      this.setMenuOptions(this.tableData, this.menuOption, false);
-    },
-    setMenuOptions(menuData, optionsData, disabled) {
-      menuData &&
-        menuData.map(item => {
-          if (item.children && item.children.length) {
-            const option = {
-              title: item.meta.title,
-              ID: String(item.ID),
-              disabled: disabled || item.ID == this.form.ID,
-              children: []
-            };
-            this.setMenuOptions(
-              item.children,
-              option.children,
-              disabled || item.ID == this.form.ID
-            );
-            optionsData.push(option);
-          } else {
-            const option = {
-              title: item.meta.title,
-              ID: String(item.ID),
-              disabled: disabled || item.ID == this.form.ID
-            };
-            optionsData.push(option);
-          }
-        });
-    },
+     
     handleClose(done) {
-      this.initForm();
       done();
-    },
-    // 懒加载子菜单
-    load(tree, treeNode, resolve) {
-      resolve([
-        {
-          id: 31,
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          id: 32,
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        }
-      ]);
-    },
-    // 删除菜单
-    deleteMenu(ID) {
-      this.$confirm("此操作将永久删除所有角色下该菜单, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
-        .then(async () => {
-          const res = await deleteBaseMenu({ ID });
-          if (res.code == 0) {
-            this.$message({
-              type: "success",
-              message: "删除成功!"
-            });
-            this.getTableData();
-          }
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
-        });
-    },
-    // 初始化弹窗内表格方法
-    initForm() {
-      this.checkFlag = false;
-      this.$refs.menuForm.resetFields();
-      this.form = {
-        ID: 0,
-        path: "",
-        name: "",
-        hidden: "",
-        parentId: "",
-        component: "",
-        meta: {
-          title: "",
-          icon: "",
-          defaultMenu: false,
-          keepAlive: ""
-        }
-      };
     },
     // 关闭弹窗
     closeDialog() {
-      this.initForm();
+      this.$refs.elForm.resetFields();
       this.dialogFormVisible = false;
     },
-    // 添加menu
-    async enterDialog() {
-      this.$refs.menuForm.validate(async valid => {
-        if (valid) {
-          let res;
-          if (this.isEdit) {
-            res = await updateBaseMenu(this.form);
-          } else {
-            res = await addBaseMenu(this.form);
-          }
-          if (res.code == 0) {
-            this.$message({
-              type: "success",
-              message: this.isEdit ? "编辑成功" : "添加成功!"
-            });
-            this.getTableData();
-          }
-          this.initForm();
-          this.dialogFormVisible = false;
-        }
-      });
-    },
-    // 添加菜单方法，id为 0则为添加根菜单
-    addMenu(id) {
-      this.dialogTitle = "新增菜单";
-      this.form.parentId = String(id);
-      this.isEdit = false;
-      this.setOptions();
-      this.dialogFormVisible = true;
-    },
-    // 修改菜单方法
-    async editMenu(id) {
-      this.dialogTitle = "编辑菜单";
-      const res = await getBaseMenuById({ id });
-      this.form = res.data.menu;
-      this.isEdit = true;
-      this.setOptions();
-      this.dialogFormVisible = true;
+    async commitDialog(){
+       this.formData.notificationType=this.checkList.join(',');
+       const res = await commitRules(this.formData);
+      if (res.code == 200) {
+        this.getTableData();
+      }
+      this.closeDialog();
+
     }
+    
   },
   async created() {
-    this.limit = 999;
+    this.limit = 10;
     await this.getTableData();
   }
 };

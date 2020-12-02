@@ -63,7 +63,7 @@ service.interceptors.response.use(
             store.commit('user/setToken', response.headers["new-token"])
         }
         if (response.data.code == 200 || response.headers.success === "true") {
-            console.info(response.data);
+            console.log("请求返回值：", response.data);
             return response.data
         } else {
             Message({
